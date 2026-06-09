@@ -266,20 +266,31 @@ CreateButton("Local", "Reset Character", function()
 	if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Health = 0 end
 end)
 
+
 -- ==========================================
 -- 2. COMBAT CONFIGS
 -- ==========================================
 local aimbotActive = false
+local aimbotStrength = 100
+local autoShootActive = false
+
+-- Dynamically finds the closest player to your screen center/crosshair
 local function getClosestPlayer()
 	local closestDist = math.huge
 	local closestPlr = nil
+	local cam = workspace.CurrentCamera
+	
 	for _, p in pairs(Players:GetPlayers()) do
 		if p ~= player and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-			local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(p.Character.Head.Position)
+			local pos, onScreen = cam:WorldToViewportPoint(p.Character.Head.Position)
 			if onScreen then
-				local mousePos = isMobile and Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2) or Vector2.new(mouse.X, mouse.Y)
-				local dist = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
-				if dist < closestDist then closestDist = dist closestPlr = p end
+				local centerScreen = isMobile and Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2) or Vector2.new(mouse.X, mouse.Y)
+				local dist = (Vector2.new(pos.X, pos.Y) - centerScreen).Magnitude
+				
+				if dist < closestDist then 
+					closestDist = dist 
+					closestPlr = p 
+				end
 			end
 		end
 	end
@@ -290,14 +301,34 @@ RunService.RenderStepped:Connect(function()
 	if aimbotActive then
 		local target = getClosestPlayer()
 		if target and target.Character and target.Character:FindFirstChild("Head") then
-			workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position)
+			local cam = workspace.CurrentCamera
+			local targetHead = target.Character.Head.Position
+			local targetCFrame = CFrame.new(cam.CFrame.Position, targetHead)
+			
+			-- Smooth the aimbot based on the strength slider (1 = slow drag, 100 = instant snap)
+			local smoothingAlpha = aimbotStrength / 100
+			cam.CFrame = cam.CFrame:Lerp(targetCFrame, smoothingAlpha)
+			
+			-- Auto-Shoot logic
+			if autoShootActive then
+				local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+				if tool then tool:Activate() end
+			end
 		end
 	end
 end)
 
 CreateToggle("Combat", "Aimbot (Lock Cam to Target)", false, function(state)
 	aimbotActive = state
-	SendNotification("Aimbot", state and "Locked searching..." or "Disabled", 2)
+	SendNotification("Aimbot", state and "Hunting closest target..." or "Disabled", 2)
+end)
+
+CreateSlider("Combat", "Aimbot Strength", 1, 100, 100, function(val)
+	aimbotStrength = val
+end)
+
+CreateToggle("Combat", "Auto-Shoot (Requires Tool)", false, function(state)
+	autoShootActive = state
 end)
 
 CreateButton("Combat", "Server Fling (Teleport Blast)", function()
@@ -368,21 +399,7 @@ CreateToggle("Combat", "Spinbot (Dodge)", false, function(state)
 		if hrp:FindFirstChild("SpinAtt") then hrp.SpinAtt:Destroy() end
 	end
 end)
-
-local autoClickActive = false
-CreateToggle("Combat", "Auto-Clicker Simulator", false, function(state)
-	autoClickActive = state
-	if state then
-		SendNotification("AutoClicker", "Simulating regular fast-clicks", 2)
-		task.spawn(function()
-			while autoClickActive do
-				local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
-				if tool then tool:Activate() end
-				task.wait(0.05)
-			end
-		end)
-	end
-end)
+						
 
 -- ==========================================
 -- 3. MOVEMENT CONFIGS
