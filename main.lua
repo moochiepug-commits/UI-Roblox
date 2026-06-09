@@ -21,8 +21,13 @@ local Theme = {
 	TextDim = Color3.fromRGB(140, 130, 160)       -- Faded Purple-Grey
 }
 
--- Mobile Adaptive GUI Positioning
+-- Mobile Adaptive GUI Positioning & Executor Bypass
 local guiParent = player:WaitForChild("PlayerGui")
+pcall(function()
+	local core = game:GetService("CoreGui")
+	if core then guiParent = core end
+end)
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "DeltaGalaxyV7_MobilePlus"
 gui.ResetOnSpawn = false
@@ -262,7 +267,7 @@ CreateButton("Local", "Reset Character", function()
 end)
 
 -- ==========================================
--- 2. COMBAT CONFIGS (WITH COMPOSITE CLEANUP)
+-- 2. COMBAT CONFIGS
 -- ==========================================
 local aimbotActive = false
 local function getClosestPlayer()
@@ -336,7 +341,6 @@ CreateToggle("Combat", "Expand Hitboxes (Reach)", false, function(state)
 			end
 		end)
 	else
-		-- Flawless Reset State
 		for p, size in pairs(storedSizes) do
 			if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
 				p.Character.HumanoidRootPart.Size = size or Vector3.new(2, 2, 1)
@@ -365,7 +369,6 @@ CreateToggle("Combat", "Spinbot (Dodge)", false, function(state)
 	end
 end)
 
--- Mobile Safe Fast-Click Trigger
 local autoClickActive = false
 CreateToggle("Combat", "Auto-Clicker Simulator", false, function(state)
 	autoClickActive = state
@@ -382,7 +385,7 @@ CreateToggle("Combat", "Auto-Clicker Simulator", false, function(state)
 end)
 
 -- ==========================================
--- 3. MOVEMENT CONFIGS (WITH MOBILE FLIGHT INTERFACE)
+-- 3. MOVEMENT CONFIGS
 -- ==========================================
 local noclipActive = false
 local noclipConnection
@@ -429,4 +432,54 @@ mobileFlyPanel.Size = UDim2.new(0, 70, 0, 130) mobileFlyPanel.Position = UDim2.n
 local upBtn = Instance.new("TextButton", mobileFlyPanel)
 upBtn.Size = UDim2.new(1, 0, 0, 50) upBtn.BackgroundColor3 = Theme.Sidebar upBtn.Text = "▲" upBtn.TextColor3 = Theme.Accent upBtn.TextSize = 24
 Instance.new("UICorner", upBtn) Instance.new("UIStroke", upBtn).Color = Theme.Accent
-upBtn.Inpu
+upBtn.InputBegan:Connect(function() flyUp = true end) upBtn.InputEnded:Connect(function() flyUp = false end)
+
+local downBtn = Instance.new("TextButton", mobileFlyPanel)
+downBtn.Size = UDim2.new(1, 0, 0, 50) downBtn.Position = UDim2.new(0, 0, 0, 65) downBtn.BackgroundColor3 = Theme.Sidebar downBtn.Text = "▼" downBtn.TextColor3 = Theme.Accent downBtn.TextSize = 24
+Instance.new("UICorner", downBtn) Instance.new("UIStroke", downBtn).Color = Theme.Accent
+downBtn.InputBegan:Connect(function() flyDown = true end) downBtn.InputEnded:Connect(function() flyDown = false end)
+
+CreateToggle("Movement", "Flight Mode", false, function(state)
+	flying = state
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	
+	if flying then
+		if isMobile then mobileFlyPanel.Visible = true end
+		
+		local att = Instance.new("Attachment") att.Name = "FlyAtt" att.Parent = hrp
+		local lv = Instance.new("LinearVelocity") lv.Name = "FlyVelocity" lv.Attachment0 = att
+		lv.MaxForce = math.huge lv.VectorVelocity = Vector3.new(0,0,0) lv.Parent = hrp
+		
+		task.spawn(function()
+			while flying and hrp and hrp.Parent do
+				local cam = workspace.CurrentCamera
+				local moveDir = Vector3.new(0,0,0)
+				
+				if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+				if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+				
+				if isMobile and player.Character:FindFirstChild("Humanoid") then
+					local moveDirection = player.Character.Humanoid.MoveDirection
+					if moveDirection.Magnitude > 0 then moveDir = moveDir + moveDirection end
+				end
+				
+				if UserInputService:IsKeyDown(Enum.KeyCode.Space) or flyUp then moveDir = moveDir + Vector3.new(0,1,0) end
+				if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or flyDown then moveDir = moveDir - Vector3.new(0,1,0) end
+				
+				lv.VectorVelocity = moveDir.Magnitude > 0 and moveDir.Unit * flySpeed or Vector3.new(0,0,0)
+				task.wait()
+			end
+			if lv then lv:Destroy() end
+			if att then att:Destroy() end
+		end)
+	else
+		mobileFlyPanel.Visible = false
+		flyUp = false flyDown = false
+		if hrp:FindFirstChild("FlyVelocity") then hrp.FlyVelocity:Destroy() end
+		if hrp:FindFirstChild("FlyAtt") then hrp.FlyAtt:Destroy() end
+	end
+end)
