@@ -12,23 +12,24 @@ local mouse = player:GetMouse()
 local isMobile = UserInputService.TouchEnabled
 
 -- ==========================================
--- THEME & UI CONFIGURATION
+-- GALAXY THEME CONFIGURATION
 -- ==========================================
 local Theme = {
-	Background = Color3.fromRGB(15, 15, 20),
-	Sidebar = Color3.fromRGB(10, 10, 15),
-	Accent = Color3.fromRGB(255, 50, 50), -- Changed to Aggressive Red for Combat Update
-	AccentHover = Color3.fromRGB(255, 100, 100),
-	ElementBG = Color3.fromRGB(22, 22, 30),
-	TextMain = Color3.fromRGB(255, 255, 255),
-	TextDim = Color3.fromRGB(160, 160, 175)
+	Background = Color3.fromRGB(12, 8, 18),       -- Deep Space Black/Purple
+	Sidebar = Color3.fromRGB(20, 15, 30),         -- Dark Galaxy Purple
+	Accent = Color3.fromRGB(170, 85, 255),        -- Neon Galaxy Purple Glow
+	AccentHover = Color3.fromRGB(200, 130, 255),  -- Bright Purple
+	ElementBG = Color3.fromRGB(25, 20, 35),       -- Mid-tone Purple
+	TextMain = Color3.fromRGB(240, 240, 255),     -- Starlight White
+	TextDim = Color3.fromRGB(140, 130, 160)       -- Faded Purple-Grey
 }
 
+-- GUI Setup
 local guiParent = player:WaitForChild("PlayerGui")
 pcall(function() if CoreGui:FindFirstChild("RobloxGui") then guiParent = CoreGui end end)
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "DeltaUltimateV6"
+gui.Name = "DeltaGalaxyV7"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = guiParent
@@ -71,10 +72,12 @@ local function SendNotification(title, text, duration)
 	end)
 end
 
+-- ==========================================
 -- MAIN INTERFACE BUILDER
+-- ==========================================
 local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = isMobile and UDim2.new(0, 420, 0, 280) or UDim2.new(0, 500, 0, 350)
-mainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
+mainFrame.Size = isMobile and UDim2.new(0, 420, 0, 280) or UDim2.new(0, 520, 0, 360)
+mainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
 mainFrame.BackgroundColor3 = Theme.Background
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
 Instance.new("UIStroke", mainFrame).Color = Theme.Accent
@@ -99,10 +102,10 @@ local cover = Instance.new("Frame", titleBar) cover.Size = UDim2.new(1, 0, 0, 10
 
 local titleText = Instance.new("TextLabel", titleBar)
 titleText.Size = UDim2.new(1, -60, 1, 0) titleText.Position = UDim2.new(0, 15, 0, 0) titleText.BackgroundTransparency = 1
-titleText.Text = "DELTA ULTIMATE ◆ V6 (COMBAT)" titleText.TextColor3 = Theme.Accent titleText.Font = Enum.Font.GothamBlack titleText.TextSize = 16 titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.Text = "DELTA ◆ GALAXY V7" titleText.TextColor3 = Theme.Accent titleText.Font = Enum.Font.GothamBlack titleText.TextSize = 16 titleText.TextXAlignment = Enum.TextXAlignment.Left
 
 local toggleIcon = Instance.new("TextButton", gui)
-toggleIcon.Size = UDim2.new(0, 50, 0, 50) toggleIcon.Position = UDim2.new(0.05, 0, 0.1, 0) toggleIcon.BackgroundColor3 = Theme.Sidebar toggleIcon.Text = "⚔️" toggleIcon.TextSize = 24 toggleIcon.Visible = false
+toggleIcon.Size = UDim2.new(0, 50, 0, 50) toggleIcon.Position = UDim2.new(0.05, 0, 0.1, 0) toggleIcon.BackgroundColor3 = Theme.Sidebar toggleIcon.Text = "🌌" toggleIcon.TextSize = 24 toggleIcon.Visible = false
 Instance.new("UICorner", toggleIcon).CornerRadius = UDim.new(1, 0) Instance.new("UIStroke", toggleIcon).Color = Theme.Accent
 
 local closeBtn = Instance.new("TextButton", titleBar)
@@ -134,10 +137,13 @@ local function CreateTab(name)
 	return scroll
 end
 
+-- ==========================================
+-- UI COMPONENT GENERATORS
+-- ==========================================
 local function CreateButton(tabName, text, callback)
 	local btn = Instance.new("TextButton", Tabs[tabName].Scroll)
 	btn.Size = UDim2.new(1, -10, 0, 40) btn.BackgroundColor3 = Theme.ElementBG btn.Text = "  " .. text btn.TextColor3 = Theme.TextMain btn.Font = Enum.Font.GothamSemibold btn.TextSize = 13 btn.TextXAlignment = Enum.TextXAlignment.Left
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6) Instance.new("UIStroke", btn).Color = Color3.fromRGB(50,50,60)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6) Instance.new("UIStroke", btn).Color = Color3.fromRGB(60,40,80)
 	btn.MouseButton1Click:Connect(function()
 		TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.AccentHover}):Play()
 		task.spawn(callback)
@@ -151,31 +157,111 @@ local function CreateToggle(tabName, text, default, callback)
 	local btn = Instance.new("TextButton", Tabs[tabName].Scroll)
 	btn.Size = UDim2.new(1, -10, 0, 40) btn.BackgroundColor3 = Theme.ElementBG btn.Text = "  " .. text btn.TextColor3 = Theme.TextMain btn.Font = Enum.Font.GothamSemibold btn.TextSize = 13 btn.TextXAlignment = Enum.TextXAlignment.Left
 	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-	local stroke = Instance.new("UIStroke", btn) stroke.Color = state and Theme.Accent or Color3.fromRGB(50,50,60)
-	local indicator = Instance.new("Frame", btn) indicator.Size = UDim2.new(0, 20, 0, 20) indicator.Position = UDim2.new(1, -30, 0.5, -10) indicator.BackgroundColor3 = state and Theme.Accent or Theme.Background
-	Instance.new("UICorner", indicator).CornerRadius = UDim.new(0, 4)
+	Instance.new("UIStroke", btn).Color = Color3.fromRGB(60,40,80)
+	
+	-- Checkbox UI
+	local checkbox = Instance.new("Frame", btn)
+	checkbox.Size = UDim2.new(0, 20, 0, 20) checkbox.Position = UDim2.new(1, -30, 0.5, -10)
+	checkbox.BackgroundColor3 = Theme.Background
+	Instance.new("UICorner", checkbox).CornerRadius = UDim.new(0, 4)
+	Instance.new("UIStroke", checkbox).Color = Theme.Accent
+	
+	local checkFill = Instance.new("Frame", checkbox)
+	checkFill.Size = state and UDim2.new(1, -6, 1, -6) or UDim2.new(0,0,0,0)
+	checkFill.Position = UDim2.new(0.5, 0, 0.5, 0) checkFill.AnchorPoint = Vector2.new(0.5, 0.5)
+	checkFill.BackgroundColor3 = Theme.Accent
+	Instance.new("UICorner", checkFill).CornerRadius = UDim.new(0, 2)
+	
 	btn.MouseButton1Click:Connect(function()
 		state = not state
-		TweenService:Create(indicator, TweenInfo.new(0.2), {BackgroundColor3 = state and Theme.Accent or Theme.Background}):Play()
-		TweenService:Create(stroke, TweenInfo.new(0.2), {Color = state and Theme.Accent or Color3.fromRGB(50,50,60)}):Play()
+		if state then
+			TweenService:Create(checkFill, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(1, -6, 1, -6)}):Play()
+		else
+			TweenService:Create(checkFill, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+		end
 		task.spawn(callback, state)
 	end)
 end
 
--- TABS
+local function CreateSlider(tabName, text, min, max, default, callback)
+	local frame = Instance.new("Frame", Tabs[tabName].Scroll)
+	frame.Size = UDim2.new(1, -10, 0, 50) frame.BackgroundColor3 = Theme.ElementBG
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+	Instance.new("UIStroke", frame).Color = Color3.fromRGB(60,40,80)
+	
+	local label = Instance.new("TextLabel", frame)
+	label.Size = UDim2.new(1, -20, 0, 20) label.Position = UDim2.new(0, 10, 0, 5) label.BackgroundTransparency = 1
+	label.Text = text .. ": " .. tostring(default) label.TextColor3 = Theme.TextMain label.Font = Enum.Font.GothamSemibold label.TextSize = 12 label.TextXAlignment = Enum.TextXAlignment.Left
+	
+	local track = Instance.new("Frame", frame)
+	track.Size = UDim2.new(1, -20, 0, 6) track.Position = UDim2.new(0, 10, 0, 35) track.BackgroundColor3 = Theme.Background
+	Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
+	
+	local fill = Instance.new("Frame", track)
+	fill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0) fill.BackgroundColor3 = Theme.Accent
+	Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+	
+	local sliding = false
+	local function updateSlider(input)
+		local pos = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+		local value = math.floor(min + ((max - min) * pos))
+		fill.Size = UDim2.new(pos, 0, 1, 0)
+		label.Text = text .. ": " .. tostring(value)
+		callback(value)
+	end
+	
+	frame.InputBegan:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then sliding = true updateSlider(inp) end
+	end)
+	UserInputService.InputChanged:Connect(function(inp)
+		if sliding and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then updateSlider(inp) end
+	end)
+	UserInputService.InputEnded:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then sliding = false end
+	end)
+end
+
+-- ==========================================
+-- TABS SETUP
+-- ==========================================
+CreateTab("Local")
 CreateTab("Combat")
 CreateTab("Movement")
 CreateTab("Visuals")
+CreateTab("World")
 
-Tabs["Combat"].Scroll.Visible = true Tabs["Combat"].Btn.TextColor3 = Theme.Accent
+Tabs["Local"].Scroll.Visible = true Tabs["Local"].Btn.TextColor3 = Theme.Accent
 
 -- ==========================================
--- COMBAT TAB (NEW FEATURES)
+-- 1. LOCAL TAB
 -- ==========================================
+CreateSlider("Local", "WalkSpeed", 16, 300, 16, function(val)
+	if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.WalkSpeed = val end
+end)
 
--- 🎯 1. AIMBOT
+CreateSlider("Local", "JumpPower", 50, 500, 50, function(val)
+	if player.Character and player.Character:FindFirstChild("Humanoid") then 
+		player.Character.Humanoid.UseJumpPower = true 
+		player.Character.Humanoid.JumpPower = val 
+	end
+end)
+
+CreateButton("Local", "Heal / Infinite Health (Visual/Local)", function()
+	if player.Character and player.Character:FindFirstChild("Humanoid") then
+		player.Character.Humanoid.MaxHealth = math.huge
+		player.Character.Humanoid.Health = math.huge
+		SendNotification("God Mode", "Health set to Infinity", 3)
+	end
+end)
+
+CreateButton("Local", "Reset Character", function()
+	if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Health = 0 end
+end)
+
+-- ==========================================
+-- 2. COMBAT TAB
+-- ==========================================
 local aimbotActive = false
-local aimbotTarget = nil
 local function getClosestPlayer()
 	local closestDist = math.huge
 	local closestPlr = nil
@@ -185,10 +271,7 @@ local function getClosestPlayer()
 			if onScreen then
 				local mousePos = Vector2.new(mouse.X, mouse.Y)
 				local dist = (Vector2.new(pos.X, pos.Y) - mousePos).Magnitude
-				if dist < closestDist then
-					closestDist = dist
-					closestPlr = p
-				end
+				if dist < closestDist then closestDist = dist closestPlr = p end
 			end
 		end
 	end
@@ -197,20 +280,19 @@ end
 
 RunService.RenderStepped:Connect(function()
 	if aimbotActive then
-		aimbotTarget = getClosestPlayer()
-		if aimbotTarget and aimbotTarget.Character and aimbotTarget.Character:FindFirstChild("Head") then
-			workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, aimbotTarget.Character.Head.Position)
+		local target = getClosestPlayer()
+		if target and target.Character and target.Character:FindFirstChild("Head") then
+			workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, target.Character.Head.Position)
 		end
 	end
 end)
 
-CreateToggle("Combat", "Aimbot (Locks camera to closest player)", false, function(state)
+CreateToggle("Combat", "Aimbot (Lock Camera to Target)", false, function(state)
 	aimbotActive = state
 	if state then SendNotification("Aimbot", "Searching for targets...", 2) end
 end)
 
--- 🌪️ 2. SERVER FLING
-CreateButton("Combat", "Server Fling (Teleport & Fling Everyone)", function()
+CreateButton("Combat", "Server Fling (Teleport & Destroy)", function()
 	SendNotification("Flinging", "Attacking server...", 3)
 	local char = player.Character
 	if char and char:FindFirstChild("HumanoidRootPart") then
@@ -218,53 +300,32 @@ CreateButton("Combat", "Server Fling (Teleport & Fling Everyone)", function()
 		local thrust = Instance.new("BodyAngularVelocity", char.HumanoidRootPart)
 		thrust.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
 		thrust.AngularVelocity = Vector3.new(0, 90000, 0)
-		
 		for _, p in pairs(Players:GetPlayers()) do
 			if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
 				char.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-				task.wait(0.2) -- Stay on them for a moment to ensure physics collision registers
+				task.wait(0.2)
 			end
 		end
-		thrust:Destroy()
-		char.HumanoidRootPart.CFrame = oldPos
+		thrust:Destroy() char.HumanoidRootPart.CFrame = oldPos
 		SendNotification("Flinging", "Finished!", 2)
 	end
 end)
 
--- 🥊 3. PUNCH FLING WITH ANIMATION
 CreateButton("Combat", "Get 'Punch Fling' Tool", function()
-	local tool = Instance.new("Tool", player.Backpack)
-	tool.Name = "Punch Fling"
-	tool.RequiresHandle = false
-	
-	-- Standard R15 Punch Animation
-	local anim = Instance.new("Animation")
-	anim.AnimationId = "rbxassetid://522635514"
-	
+	local tool = Instance.new("Tool", player.Backpack) tool.Name = "Punch Fling" tool.RequiresHandle = false
+	local anim = Instance.new("Animation") anim.AnimationId = "rbxassetid://522635514"
 	tool.Activated:Connect(function()
-		local char = player.Character
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		local char = player.Character local hum = char and char:FindFirstChildOfClass("Humanoid")
 		if char and hum and char:FindFirstChild("HumanoidRootPart") then
-			-- Play Animation
-			local loadedAnim = hum:LoadAnimation(anim)
-			loadedAnim:Play()
-			
-			-- Create Fling Physics temporarily
+			hum:LoadAnimation(anim):Play()
 			local thrust = Instance.new("BodyAngularVelocity", char.HumanoidRootPart)
-			thrust.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-			thrust.AngularVelocity = Vector3.new(0, 50000, 0)
-			
-			-- Push character forward slightly
+			thrust.MaxTorque = Vector3.new(math.huge, math.huge, math.huge) thrust.AngularVelocity = Vector3.new(0, 50000, 0)
 			local bp = Instance.new("BodyVelocity", char.HumanoidRootPart)
-			bp.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-			bp.Velocity = char.HumanoidRootPart.CFrame.LookVector * 50
-			
-			task.wait(0.3)
-			thrust:Destroy()
-			bp:Destroy()
+			bp.MaxForce = Vector3.new(9e9, 9e9, 9e9) bp.Velocity = char.HumanoidRootPart.CFrame.LookVector * 50
+			task.wait(0.3) thrust:Destroy() bp:Destroy()
 		end
 	end)
-	SendNotification("Combat Tool", "Equip 'Punch Fling', get close to someone, and click to punch them away!", 4)
+	SendNotification("Combat Tool", "Equip 'Punch Fling' and click near enemies!", 3)
 end)
 
 local hitboxActive = false
@@ -290,9 +351,30 @@ CreateToggle("Combat", "Expand Player Hitboxes (Reach)", false, function(state)
 	end)
 end)
 
+local spinbot = false
+CreateToggle("Combat", "Spinbot (Dodge bullets)", false, function(state)
+	spinbot = state
+	local char = player.Character
+	if spinbot and char and char:FindFirstChild("HumanoidRootPart") then
+		local spin = Instance.new("BodyAngularVelocity", char.HumanoidRootPart)
+		spin.Name = "DeltaSpin" spin.MaxTorque = Vector3.new(0, math.huge, 0) spin.AngularVelocity = Vector3.new(0, 50, 0)
+	elseif char and char:FindFirstChild("HumanoidRootPart") and char.HumanoidRootPart:FindFirstChild("DeltaSpin") then
+		char.HumanoidRootPart.DeltaSpin:Destroy()
+	end
+end)
+
+local autoClick = false
+CreateToggle("Combat", "Auto-Clicker", false, function(state)
+	autoClick = state
+	task.spawn(function()
+		while autoClick do
+			VirtualUser:CaptureController() VirtualUser:ClickButton1(Vector2.new(0,0)) task.wait(0.01)
+		end
+	end)
+end)
 
 -- ==========================================
--- MOVEMENT & VISUALS TAB (Retained from V5)
+-- 3. MOVEMENT TAB
 -- ==========================================
 local noclip = false
 CreateToggle("Movement", "Noclip (Walk through walls)", false, function(state)
@@ -314,25 +396,17 @@ UserInputService.JumpRequest:Connect(function()
 end)
 CreateToggle("Movement", "Infinite Jump", false, function(state) infJump = state end)
 
-local espToggle = false
-CreateToggle("Visuals", "Player ESP (See through walls)", false, function(state)
-	espToggle = state
-	while espToggle do
-		for _, p in pairs(Players:GetPlayers()) do
-			if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-				if not p.Character:FindFirstChild("DeltaESP") then
-					local h = Instance.new("Highlight", p.Character)
-					h.Name = "DeltaESP" h.FillColor = Theme.Accent h.FillTransparency = 0.5 h.OutlineColor = Color3.fromRGB(255,255,255)
-				end
-			end
-		end
-		task.wait(1)
-	end
-	if not espToggle then
-		for _, p in pairs(Players:GetPlayers()) do
-			if p.Character and p.Character:FindFirstChild("DeltaESP") then p.Character.DeltaESP:Destroy() end
-		end
-	end
-end)
-
-SendNotification("Loaded", "Delta Ultimate V6 (Combat Update) successfully injected!", 4)
+local flying = false
+local flySpeed = 50
+CreateToggle("Movement", "Flight Mode", false, function(state)
+	flying = state
+	local char = player.Character
+	if flying and char and char:FindFirstChild("HumanoidRootPart") then
+		local bv = Instance.new("BodyVelocity", char.HumanoidRootPart)
+		bv.Name = "DeltaFlyV" bv.MaxForce = Vector3.new(9e9, 9e9, 9e9) bv.Velocity = Vector3.new(0,0,0)
+		local bg = Instance.new("BodyGyro", char.HumanoidRootPart)
+		bg.Name = "DeltaFlyG" bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9) bg.P = 9000
+		
+		task.spawn(function()
+			while flying and char:FindFirstChild("HumanoidRootPart") do
+				local cam = workspace.a
